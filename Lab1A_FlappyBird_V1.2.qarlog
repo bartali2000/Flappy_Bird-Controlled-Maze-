@@ -1,0 +1,77 @@
+Quartus Prime Archive log --	C:/Lab1A/project/Current_Score_fixed_restored/Lab1A_FlappyBird_V1.2.qarlog
+
+Archive:	C:/Lab1A/project/Current_Score_fixed_restored/Lab1A_FlappyBird_V1.2.qar
+Date:		Sat Oct 10 22:28:30 2026
+Quartus Prime		17.0.0 Build 595 04/25/2017 SJ Lite Edition
+
+	=========== Files Selected: ===========
+C:/Lab1A/project/Current_Score_fixed_restored/ALL_HEXSS.bdf
+C:/Lab1A/project/Current_Score_fixed_restored/CLK_31P5.cmp
+C:/Lab1A/project/Current_Score_fixed_restored/CLK_31P5.qip
+C:/Lab1A/project/Current_Score_fixed_restored/CLK_31P5.sip
+C:/Lab1A/project/Current_Score_fixed_restored/CLK_31P5.spd
+C:/Lab1A/project/Current_Score_fixed_restored/CLK_31P5.v
+C:/Lab1A/project/Current_Score_fixed_restored/CLK_31P5/CLK_31P5_0002.qip
+C:/Lab1A/project/Current_Score_fixed_restored/CLK_31P5/CLK_31P5_0002.v
+C:/Lab1A/project/Current_Score_fixed_restored/CLK_31P5_sim/CLK_31P5.vo
+C:/Lab1A/project/Current_Score_fixed_restored/DE10_Standard_Audio.sdc
+C:/Lab1A/project/Current_Score_fixed_restored/KBDINTF.qxp
+C:/Lab1A/project/Current_Score_fixed_restored/Lab1Demo.qpf
+C:/Lab1A/project/Current_Score_fixed_restored/Lab1Demo.qsf
+C:/Lab1A/project/Current_Score_fixed_restored/Lab1Demo_assignment_defaults.qdf
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/AUDIO/AUDIO.bdf
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/AUDIO/JukeBox1.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/AUDIO/Mili_sec_counter.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/AUDIO/SinTable.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/AUDIO/ToneDecoder.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/AUDIO/addr_counter.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/AUDIO/melody_player_1.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/AUDIO/prescaler.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/AUDIO/songs.mif
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/KEYBOARDX/TOP_KBD.bdf
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/KEYBOARDX/keyPad_decoder.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/KEYBOARDX/random.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/KEYBOARDX/simple_up_counter.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/Score/ScoreBitMap.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/Score/ScoreCounter.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/Score/ScoreObject.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/Score/Score_TOP.bdf
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/Score/up_counter.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/Seg7/SEG7.SV
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/HART_DISPLAY.bdf
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/HartsMatrixBitMap.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/MyConstant.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/NumbersBitMap.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/PipeBitmap.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/Pipe_Object.bdf
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/Smiley_Block_T.bdf
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/TOP_FLAPPY_BIRD.bdf
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/VGA_Controller.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/back_ground_draw.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/game_controller.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/objects_mux.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/pipe_move.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/pipes_mux.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/smileyBitMap.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/smiley_move.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/square_Hart_object.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA/square_object.sv
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/VGA_BG.mif
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/cap_64x22.mif
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/heart1.mif
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/heart2.mif
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/hill.mif
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/numbers.mif
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/shaft_64x1.mif
+C:/Lab1A/project/Current_Score_fixed_restored/RTL/smiely.mif
+C:/Lab1A/project/Current_Score_fixed_restored/assignment_defaults.qdf
+C:/Lab1A/project/Current_Score_fixed_restored/audio_codec_controller.QXP
+C:/Lab1A/project/Current_Score_fixed_restored/constraints/DE10_Standard_Audio.sdc
+C:/Lab1A/project/Current_Score_fixed_restored/constraints/pin.tcl
+C:/Lab1A/project/Current_Score_fixed_restored/output_files/Chain1.cdf
+C:/Lab1A/project/Current_Score_fixed_restored/output_files/Chain2.cdf
+C:/Lab1A/project/Current_Score_fixed_restored/stp1.stp
+	======= Total: 66 files to archive =======
+
+	================ Status: ===============
+All files archived successfully.
