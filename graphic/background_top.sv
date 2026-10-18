@@ -3,6 +3,7 @@ module background_top (
     input  logic        resetN,
     input  logic        frame_pulse,
     input  logic        next_level_pulse, // יתחבר בהמשך לבקר המשחק (כרגע לאדמה)
+	 input  logic        game_init_pulse,
     input  logic [10:0] PixelX, PixelY,
     
     output logic [7:0]  RGB_out
@@ -35,12 +36,13 @@ module background_top (
     logic [10:0] celestial_x;
     logic [10:0] celestial_y;
     logic        is_night;
-
-    day_night_controller u_time_manager (
+	 
+day_night_controller u_time_manager (
         .clk              (clk),
         .resetN           (resetN),
         .frame_pulse      (frame_pulse),
         .next_level_pulse (next_level_pulse),
+        .game_init_pulse  (game_init_pulse), // <--- העברה בתוך המודול
         .sky_color        (current_sky_color),
         .celestial_color  (celestial_color),
         .celestial_x      (celestial_x),

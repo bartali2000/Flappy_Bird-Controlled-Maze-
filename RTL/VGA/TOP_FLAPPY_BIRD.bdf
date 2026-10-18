@@ -2104,9 +2104,26 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect -408 576 -184 720)
+	(rect -592 680 -560 712)
+	(text "GND" (rect 8 16 29 26)(font "Arial" (font_size 6)))
+	(text "inst8" (rect 3 21 25 38)(font "Intel Clear" )(invisible))
+	(port
+		(pt 16 0)
+		(output)
+		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
+		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
+		(line (pt 16 8)(pt 16 0))
+	)
+	(drawing
+		(line (pt 8 8)(pt 16 16))
+		(line (pt 16 16)(pt 24 8))
+		(line (pt 8 8)(pt 24 8))
+	)
+)
+(symbol
+	(rect -408 576 -184 752)
 	(text "background_top" (rect 5 0 82 12)(font "Arial" ))
-	(text "inst4" (rect 8 128 30 145)(font "Intel Clear" ))
+	(text "inst23" (rect 8 160 36 177)(font "Intel Clear" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -2138,16 +2155,23 @@ agreement for further details.
 	(port
 		(pt 0 96)
 		(input)
-		(text "PixelX[10..0]" (rect 0 0 61 12)(font "Arial" ))
-		(text "PixelX[10..0]" (rect 21 91 82 103)(font "Arial" ))
-		(line (pt 0 96)(pt 16 96)(line_width 3))
+		(text "game_init_pulse" (rect 0 0 79 12)(font "Arial" ))
+		(text "game_init_pulse" (rect 21 91 100 103)(font "Arial" ))
+		(line (pt 0 96)(pt 16 96))
 	)
 	(port
 		(pt 0 112)
 		(input)
-		(text "PixelY[10..0]" (rect 0 0 63 12)(font "Arial" ))
-		(text "PixelY[10..0]" (rect 21 107 84 119)(font "Arial" ))
+		(text "PixelX[10..0]" (rect 0 0 61 12)(font "Arial" ))
+		(text "PixelX[10..0]" (rect 21 107 82 119)(font "Arial" ))
 		(line (pt 0 112)(pt 16 112)(line_width 3))
+	)
+	(port
+		(pt 0 128)
+		(input)
+		(text "PixelY[10..0]" (rect 0 0 63 12)(font "Arial" ))
+		(text "PixelY[10..0]" (rect 21 123 84 135)(font "Arial" ))
+		(line (pt 0 128)(pt 16 128)(line_width 3))
 	)
 	(port
 		(pt 224 32)
@@ -2157,24 +2181,7 @@ agreement for further details.
 		(line (pt 224 32)(pt 208 32)(line_width 3))
 	)
 	(drawing
-		(rectangle (rect 16 16 208 128))
-	)
-)
-(symbol
-	(rect -592 680 -560 712)
-	(text "GND" (rect 8 16 29 26)(font "Arial" (font_size 6)))
-	(text "inst8" (rect 3 21 25 38)(font "Intel Clear" )(invisible))
-	(port
-		(pt 16 0)
-		(output)
-		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
-		(text "1" (rect 18 0 23 12)(font "Courier New" (bold))(invisible))
-		(line (pt 16 8)(pt 16 0))
-	)
-	(drawing
-		(line (pt 8 8)(pt 16 16))
-		(line (pt 16 16)(pt 24 8))
-		(line (pt 8 8)(pt 24 8))
+		(rectangle (rect 16 16 208 160))
 	)
 )
 (connector
@@ -3024,11 +3031,6 @@ agreement for further details.
 	(pt 1120 1216)
 )
 (connector
-	(text "score_clear" (rect 1056 1216 1110 1233)(font "Intel Clear" ))
-	(pt 1056 1232)
-	(pt 1120 1232)
-)
-(connector
 	(text "restartPipes" (rect 1063 1232 1119 1249)(font "Intel Clear" ))
 	(pt 1056 1248)
 	(pt 1112 1248)
@@ -3261,11 +3263,6 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(text "BGDrawReq" (rect -192 608 -135 625)(font "Intel Clear" ))
-	(pt -192 624)
-	(pt -136 624)
-)
-(connector
 	(text "BGDrawReq" (rect 394 552 451 569)(font "Intel Clear" ))
 	(pt 464 568)
 	(pt 384 568)
@@ -3357,18 +3354,6 @@ agreement for further details.
 	(pt -408 624)
 )
 (connector
-	(text "pixelX[10..0]" (rect -510 656 -451 673)(font "Intel Clear" ))
-	(pt -512 672)
-	(pt -408 672)
-	(bus)
-)
-(connector
-	(text "pixelY[10..0]" (rect -526 672 -467 689)(font "Intel Clear" ))
-	(pt -528 688)
-	(pt -408 688)
-	(bus)
-)
-(connector
 	(text "BG_RGB[7..0]" (rect -118 592 -54 609)(font "Intel Clear" ))
 	(pt -184 608)
 	(pt -104 608)
@@ -3386,6 +3371,36 @@ agreement for further details.
 (connector
 	(pt -576 656)
 	(pt -408 656)
+)
+(connector
+	(text "pixelY[10..0]" (rect -510 688 -451 705)(font "Intel Clear" ))
+	(pt -512 704)
+	(pt -408 704)
+	(bus)
+)
+(connector
+	(text "pixelX[10..0]" (rect -518 672 -459 689)(font "Intel Clear" ))
+	(pt -520 688)
+	(pt -408 688)
+	(bus)
+)
+(connector
+	(pt 1064 1232)
+	(pt 1064 1240)
+)
+(connector
+	(pt 1056 1232)
+	(pt 1064 1232)
+)
+(connector
+	(text "score_clear" (rect 1056 1224 1110 1241)(font "Intel Clear" ))
+	(pt 1064 1240)
+	(pt 1120 1240)
+)
+(connector
+	(text "score_clear" (rect -448 656 -394 673)(font "Intel Clear" ))
+	(pt -408 672)
+	(pt -456 672)
 )
 (junction (pt 2008 1736))
 (junction (pt 2008 1752))

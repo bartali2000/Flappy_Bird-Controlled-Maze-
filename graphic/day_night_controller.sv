@@ -2,7 +2,8 @@ module day_night_controller (
     input  logic        clk,
     input  logic        resetN,
     input  logic        frame_pulse,
-    input  logic        next_level_pulse,
+    input  logic        next_level_pulse, 
+    input  logic        game_init_pulse,  // <--- כניסה חדשה לאיפוס מצב הבוקר
 
     output logic [7:0]  sky_color,
     output logic [7:0]  celestial_color,
@@ -20,11 +21,13 @@ module day_night_controller (
     day_state_t current_state;
     logic [10:0] frame_counter;
 
-    // הגדלנו ל-1024. חזקה של 2 מאפשרת לנו להימנע לחלוטין מפעולות כפל וחילוק!
     localparam [10:0] MAX_FRAMES = 11'd1024;
 
-    always_ff @(posedge clk or negedge resetN) begin
+  always_ff @(posedge clk or negedge resetN) begin
         if (!resetN) begin
+            current_state <= ST_DAY;
+            frame_counter <= 11'd0;
+        end else if (game_init_pulse) begin // <--- מעבר סינכרוני למצב בוקר
             current_state <= ST_DAY;
             frame_counter <= 11'd0;
         end else if (frame_pulse) begin
@@ -42,25 +45,20 @@ module day_night_controller (
         end
     end
 
+    // (שאר קוד ה-always_comb נשאר בדיוק כפי שהיה)
     always_comb begin
         case (current_state)
             ST_DAY: begin
                 sky_color       = 8'h7B; 
                 celestial_color = 8'hFC; 
                 is_night        = 1'b0;
-
-                // במקום כפל וחילוק כבד: הזזת ביטים ימינה ב-2 (>> 2) מחלקת בדיוק ב-4. עולה 0 שערים לוגיים!
                 celestial_x     = 11'd580 - (frame_counter >> 2);
                 celestial_y     = 11'd70;
             end
-
             ST_SUNSET: begin
                 is_night = 1'b0;
-                
                 celestial_x     = 11'd324 - (frame_counter >> 2);
-                // תנועה חלקה למטה בשימוש בהזזות בלבד (חילוק ב-4 ועוד חילוק ב-16) = מרחק ירידה מושלם של 320 פיקסלים
                 celestial_y     = 11'd70 + (frame_counter >> 2) + (frame_counter >> 4); 
-
                 if (frame_counter < 11'd400) begin
                     sky_color       = 8'h7B; 
                     celestial_color = 8'hFC; 
@@ -72,16 +70,13 @@ module day_night_controller (
                     celestial_color = 8'h00; 
                 end
             end
-
             ST_NIGHT: begin
                 sky_color       = 8'h01; 
                 celestial_color = 8'hFF; 
                 is_night        = 1'b1;
-
                 celestial_x     = 11'd450;
                 celestial_y     = 11'd65;
             end
-
             default: begin
                 sky_color       = 8'h7B;
                 celestial_color = 8'hFC;
