@@ -234,7 +234,6 @@ set_global_assignment -name QIP_FILE RTL/VGA/tiles_rom.qip
 set_global_assignment -name SYSTEMVERILOG_FILE "RTL/VGA/city_bg_rom_controller .sv"
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/simple_rom.sv
 set_global_assignment -name SYSTEMVERILOG_FILE simple_rom.sv
-set_global_assignment -name BDF_FILE RTL/VGA/BG_Test.bdf
 set_global_assignment -name BDF_FILE BG_test.bdf
 set_global_assignment -name SYSTEMVERILOG_FILE RTL/VGA/simple_bg_test.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hills_controller.sv
