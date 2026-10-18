@@ -1,0 +1,79 @@
+// city_background_draw.sv - קו רקיע עירוני נגלל
+module city_background_draw (
+    input  logic        clk,
+    input  logic        resetN,
+    input  logic [10:0] pixelX,
+    input  logic [10:0] pixelY,
+    input  logic [10:0] scrollOffset,    // היסט הגלילה שמגיע מ-bg_scroll_ctrl
+
+    output logic [7:0]  BG_RGB,
+    output logic        boardersDrawReq
+);
+
+// מיפוי צבעים תואם לחומרה: [7:5]=Red, [4:2]=Green, [1:0]=Blue
+localparam logic [7:0] COLOR_SKY          = 8'b000_101_11; // תכלת עמוק / ערב
+localparam logic [7:0] COLOR_BLDG_BACK    = 8'b001_011_01; // בניינים ברקע (צללית כהה)
+localparam logic [7:0] COLOR_BLDG_FRONT   = 8'b010_100_10; // בניינים קדמיים (גוון אפור-טורקיז)
+localparam logic [7:0] COLOR_WINDOW       = 8'b111_110_00; // חלונות צהובים מוארים
+localparam logic [7:0] COLOR_GRASS        = 8'b000_111_00; // פס דשא ירוק
+localparam logic [7:0] COLOR_DIRT         = 8'b110_010_00; // אדמה חומה
+
+// קואורדינטה וירטואלית מוזזת
+logic [10:0] virtX;
+assign virtX = pixelX + scrollOffset;
+
+logic [10:0] bldg_height;
+logic is_window;
+
+always_comb begin
+    // חלוקת המסך לעמודות בניינים ברוחב 64 פיקסלים (virtX[8:6]):
+    case (virtX[8:6])
+        3'd0: bldg_height = 11'd280;
+        3'd1: bldg_height = 11'd220;
+        3'd2: bldg_height = 11'd310;
+        3'd3: bldg_height = 11'd250;
+        3'd4: bldg_height = 11'd290;
+        3'd5: bldg_height = 11'd200;
+        3'd6: bldg_height = 11'd270;
+        3'd7: bldg_height = 11'd330;
+    endcase
+
+    // חלונות מוארים מלבניים שנגללים יחד עם הבניין
+    is_window = (virtX[4:2] == 3'd2) && (pixelY[4:2] == 3'd2);
+end
+
+always_ff @(posedge clk or negedge resetN) begin
+    if (!resetN) begin
+        BG_RGB          <= 8'h00;
+        boardersDrawReq <= 1'b0;
+    end
+    else begin
+        boardersDrawReq <= 1'b1;
+
+        // 1. אדמה תחתונה
+        if (pixelY >= 430) begin
+            BG_RGB <= COLOR_DIRT;
+        end
+        // 2. קו דשא
+        else if (pixelY >= 415 && pixelY < 430) begin
+            BG_RGB <= COLOR_GRASS;
+        end
+        // 3. בניינים קדמיים עם חלונות
+        else if (pixelY >= bldg_height) begin
+            if (is_window)
+                BG_RGB <= COLOR_WINDOW;
+            else
+                BG_RGB <= COLOR_BLDG_FRONT;
+        end
+        // 4. בניינים אחוריים (קו צללית קבוע בגובה 350)
+        else if (pixelY >= 350) begin
+            BG_RGB <= COLOR_BLDG_BACK;
+        end
+        // 5. שמיים
+        else begin
+            BG_RGB <= COLOR_SKY;
+        end
+    end
+end
+
+endmodule

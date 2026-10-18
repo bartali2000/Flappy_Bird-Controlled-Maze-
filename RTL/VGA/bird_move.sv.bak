@@ -1,0 +1,42 @@
+module bird_move (
+    input  logic              clk,
+    input  logic              resetN,
+    input  logic              startOfFrame, // טריגר לסנכרון פריים
+
+    output logic signed [10:0] topLeftX,
+    output logic signed [10:0] topLeftY
+);
+
+localparam int FIXED_X   = 120;
+localparam int CENTER_Y  = 220; 
+
+// טבלת היסט של סינוס
+logic signed [6:0] sin_lut [0:31] = '{
+     0,   5,   9,  14,  17,  20,  22,  23,
+    24,  23,  22,  20,  17,  14,   9,   5,
+     0,  -5,  -9, -14, -17, -20, -22, -23,
+   -24, -23, -22, -20, -17, -14,  -9,  -5
+};
+
+logic [4:0] phase_cnt;
+logic [1:0] frame_div; // מונה חלוקה להאטה
+
+assign topLeftX = FIXED_X;
+assign topLeftY = CENTER_Y + sin_lut[phase_cnt];
+
+always_ff @(posedge clk or negedge resetN) begin
+    if (!resetN) begin
+        phase_cnt <= 5'b0;
+        frame_div <= 2'b0;
+    end
+    else if (startOfFrame) begin
+        frame_div <= frame_div + 1'b1;
+        // התקדמות בסינוס רק כל 2 פריימים (ריחוף נעים וחלק)
+        // אם תרצה עוד יותר איטי - שנה ל: if (frame_div == 2'b11)
+        if (frame_div[0] == 1'b1) begin 
+            phase_cnt <= phase_cnt + 1'b1;
+        end
+    end
+end
+
+endmodule

@@ -1,0 +1,29 @@
+// bg_scroll_ctrl.sv - מודול ניהול ההיסט של גלילת הרקע
+module bg_scroll_ctrl (
+    input  logic        clk,
+    input  logic        resetN,
+    input  logic        startOfFrame,   // שעון סנכרון של סוף פריים (60Hz)
+    input  logic [15:0] scrollSpeed,    // מהירות גלילה בנקודה קבועה (זהה ל-pipeXSpeed)
+
+    output logic [10:0] scrollOffset    // היסט הפיקסלים שיוזן לרקע
+);
+
+    // אוגר בנקודה קבועה: ביטים עליונים הם פיקסלים שלמים, תחתונים הם שברי פיקסל (חלוקה ב-64 או ב-2048)
+    // ב-pipe_move המהירות מוכפלת בקבוע, לכן נזיז לפיקסל שלם בצורה יציבה:
+    logic [21:0] scroll_sub_pixel;
+
+    always_ff @(posedge clk or negedge resetN) begin
+        if (!resetN) begin
+            scroll_sub_pixel <= 22'd0;
+        end
+        else begin
+            if (startOfFrame) begin
+                scroll_sub_pixel <= scroll_sub_pixel + {6'd0, scrollSpeed};
+            end
+        end
+    end
+
+    // מוציאים את הפיקסלים השלמים (מודולו טבעי של רוחב המסך):
+    assign scrollOffset = scroll_sub_pixel[16:6]; // שווה ערך לחילוק ב-64 (בדיוק כמו בסעיף 3.2 בחוברת)
+
+endmodule

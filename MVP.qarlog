@@ -1,0 +1,72 @@
+Quartus Prime Archive log --	C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/MVP.qarlog
+
+Archive:	C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/MVP.qar
+Date:		Sun Oct 11 17:32:47 2026
+Quartus Prime		17.0.0 Build 595 04/25/2017 SJ Lite Edition
+
+	=========== Files Selected: ===========
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/ALL_HEXSS.bdf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/CLK_31P5.cmp
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/CLK_31P5.qip
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/CLK_31P5.sip
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/CLK_31P5.spd
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/CLK_31P5.v
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/CLK_31P5/CLK_31P5_0002.qip
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/CLK_31P5/CLK_31P5_0002.v
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/CLK_31P5_sim/CLK_31P5.vo
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/DE10_Standard_Audio.sdc
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/KBDINTF.qxp
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/Lab1Demo.qpf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/Lab1Demo.qsf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/Lab1Demo_assignment_defaults.qdf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/AUDIO/AUDIO.bdf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/AUDIO/JukeBox1.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/AUDIO/Mili_sec_counter.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/AUDIO/SinTable.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/AUDIO/ToneDecoder.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/AUDIO/addr_counter.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/AUDIO/melody_player_1.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/AUDIO/prescaler.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/AUDIO/songs.mif
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/KEYBOARDX/TOP_KBD.bdf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/KEYBOARDX/keyPad_decoder.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/KEYBOARDX/random.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/KEYBOARDX/simple_up_counter.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/Overlay/OverlayBitMap.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/Overlay/OverlayObject.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/Overlay/Overlay_TOP.bdf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/Overlay/ScoreCounter.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/Overlay/up_counter.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/Seg7/SEG7.SV
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/MyConstant.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/PipeBitmap.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/Pipe_Object.bdf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/TOP_FLAPPY_BIRD.bdf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/VGA_Controller.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/back_ground_draw.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/birdBitMap.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/bird_move.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/game_controller.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/objects_mux.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/pipe_move.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/pipes_mux.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA/square_object.sv
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/VGA_BG.mif
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/alphabet_16x32.mif
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/bird.mif
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/cap_64x22.mif
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/heart1.mif
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/heart2.mif
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/shaft_64x1.mif
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/RTL/smiely.mif
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/assignment_defaults.qdf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/audio_codec_controller.QXP
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/constraints/DE10_Standard_Audio.sdc
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/constraints/pin.tcl
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/output_files/Chain1.cdf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/output_files/Chain2.cdf
+C:/Users/barak/labs/lab1A/VGA/VGA_start_of_project/MVP/stp1.stp
+	======= Total: 61 files to archive =======
+
+	================ Status: ===============
+All files archived successfully.

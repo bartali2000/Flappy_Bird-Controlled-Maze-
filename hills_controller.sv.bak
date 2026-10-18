@@ -1,0 +1,58 @@
+module hills_controller (
+    input  logic        clk,
+    input  logic        resetN,
+    input  logic [10:0] pixelX,
+    input  logic [10:0] pixelY,
+    input  logic [10:0] scrollOffset_bg, 
+    output logic [7:0]  RGBIn
+);
+
+    // חישוב מיקום האריח ברשת הגבעות (32x32 פיקסלים)
+    logic [12:0] virtX_hills;
+    assign virtX_hills = {2'b00, pixelX} + {2'b00, scrollOffset_bg};
+
+    logic [4:0] hill_tile_x;
+    logic [4:0] hill_tile_y;
+    logic [9:0] hill_rom_addr;
+
+    assign hill_tile_x   = virtX_hills[4:0];         // % 32
+    assign hill_tile_y   = (pixelY - 11'd352) % 32;  // מיקום אנכי על המסך (למשל מתחיל ב-352 עד 384)
+    assign hill_rom_addr = {hill_tile_y, hill_tile_x};
+
+    // קריאה מזיכרון ה-ROM של הגבעות
+    logic [7:0] hill_pixel_data;
+
+    simple_rom #(
+        .WIDTH(8),
+        .DEPTH(1024),
+        .MIF_FILE("pic_for_mif/retro_hills.mif") // ודא ששם הקובץ תואם
+    ) u_hills_rom (
+        .clk(clk),
+        .address(hill_rom_addr),
+        .q(hill_pixel_data)
+    );
+
+    // תצוגה על המסך
+    always_ff @(posedge clk or negedge resetN) begin
+        if (!resetN) begin
+            RGBIn <= 8'h00;
+        end else begin
+            // הצגת הגבעות בטווח הגובה 352 עד 384
+            if (pixelY >= 11'd352 && pixelY < 11'd384) begin
+                // שקיפות לבנה/בהירה (אם פיקסל רקע לבן, נציג שמיים)
+                if (hill_pixel_data == 8'hFF || hill_pixel_data == 8'b111_111_11) begin
+                    RGBIn <= 8'b000_111_00; // צבע שמיים
+                end else begin
+                    RGBIn <= hill_pixel_data;
+                end
+            end 
+            else if (pixelY >= 11'd384) begin
+                RGBIn <= 8'b110_100_00; // חום לרצפה למטה (או הרצפה הקודמת שלך)
+            end 
+            else begin
+                RGBIn <= 8'b000_111_00; // שמיים למעלה
+            end
+        end
+    end
+
+endmodule

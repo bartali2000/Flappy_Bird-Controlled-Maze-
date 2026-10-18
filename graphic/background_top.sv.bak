@@ -1,0 +1,219 @@
+module background_top (
+    input  logic        clk,           // שעון פיקסלים (למשל 25MHz עבור VGA 640x480)
+    input  logic        resetN,        // איפוס אסינכרוני פעיל ב-'0'
+    input  logic        frame_pulse,   // פולס 1 מחזור שעון בסיום כל פריים (V-Sync)
+    input  logic [9:0]  DrawX, DrawY,  // קואורדינטות סריקת המסך מבקר ה-VGA
+
+    output logic [7:0]  bg_R, bg_G, bg_B // פלט צבע סופי (24-bit RGB)
+);
+
+    localparam TRANSPARENT_COLOR = 8'hE0; // צבע שקוף מוסכם ב-MIF (מג'נטה)
+
+    // צבעי רקע אלגוריתמיים
+    localparam [7:0] SKY_R  = 8'h7B, SKY_G  = 8'hC4, SKY_B  = 8'hE3; // תכלת שמיים
+    localparam [7:0] DIRT_R = 8'hD6, DIRT_G = 8'hD8, DIRT_B = 8'h95; // חול/אדמה
+
+    // פונקציית עזר להמרת צבע 8-ביט (RGB332) ל-24-ביט RGB מלא
+    function automatic void decode_rgb332(
+        input  logic [7:0] pixel,
+        output logic [7:0] r, output logic [7:0] g, output logic [7:0] b
+    );
+        r = {pixel[7:5], pixel[7:5], pixel[7:6]};
+        g = {pixel[4:2], pixel[4:2], pixel[4:3]};
+        b = {pixel[1:0], pixel[1:0], pixel[1:0], pixel[1:0]};
+    endfunction
+
+    // -------------------------------------------------------------------------
+    // 1. מחולל התנועה (Parallax Scrolling Engine)
+    // -------------------------------------------------------------------------
+    logic [9:0] grass_scroll_x;
+    logic [9:0] city_scroll_x;
+    logic [9:0] cloud_scroll_x;
+
+    background_movement u_movement (
+        .clk            (clk),
+        .resetN         (resetN),
+        .frame_pulse    (frame_pulse),
+        .grass_scroll_x (grass_scroll_x),
+        .city_scroll_x  (city_scroll_x),
+        .cloud_scroll_x (cloud_scroll_x)
+    );
+
+    // -------------------------------------------------------------------------
+    // 2. שכבת העיר (City Layer - Roof & Body ROMs)
+    // -------------------------------------------------------------------------
+    logic [7:0] city_pixel_data;
+    logic       city_pixel_valid;
+
+    city_tiles_renderer u_city (
+        .clk              (clk),
+        .resetN           (resetN),
+        .DrawX            (DrawX),
+        .DrawY            (DrawY),
+        .city_scroll_x    (city_scroll_x),
+        .city_pixel_data  (city_pixel_data),
+        .city_pixel_valid (city_pixel_valid)
+    );
+
+    // -------------------------------------------------------------------------
+    // 3. שכבת העננים (Cloud Layer - 48x24 ROM)
+    // -------------------------------------------------------------------------
+    localparam CLOUD_W = 10'd48;
+    localparam CLOUD_H = 10'd24;
+
+    // הגדרת 3 עננים בגבהים והיסטים שונים
+    logic [9:0] cloud1_x, cloud1_y;
+    logic [9:0] cloud2_x, cloud2_y;
+    logic [9:0] cloud3_x, cloud3_y;
+
+    assign cloud1_y = 10'd40;
+    assign cloud2_y = 10'd100;
+    assign cloud3_y = 10'd60;
+
+    // מיקומי X עם תנועה מחזורית (מודולו 640)
+    assign cloud1_x = (10'd50  + 10'd640 - cloud_scroll_x) % 10'd640;
+    assign cloud2_x = (10'd260 + 10'd640 - cloud_scroll_x) % 10'd640;
+    assign cloud3_x = (10'd480 + 10'd640 - cloud_scroll_x) % 10'd640;
+
+    logic in_cloud1, in_cloud2, in_cloud3;
+    assign in_cloud1 = (DrawX >= cloud1_x) && (DrawX < cloud1_x + CLOUD_W) &&
+                       (DrawY >= cloud1_y) && (DrawY < cloud1_y + CLOUD_H);
+    assign in_cloud2 = (DrawX >= cloud2_x) && (DrawX < cloud2_x + CLOUD_W) &&
+                       (DrawY >= cloud2_y) && (DrawY < cloud2_y + CLOUD_H);
+    assign in_cloud3 = (DrawX >= cloud3_x) && (DrawX < cloud3_x + CLOUD_W) &&
+                       (DrawY >= cloud3_y) && (DrawY < cloud3_y + CLOUD_H);
+
+    // חישוב כתובת בתוך הענן
+    logic [5:0] c_local_x;
+    logic [4:0] c_local_y;
+    logic       in_any_cloud;
+
+    always_comb begin
+        if (in_cloud1) begin
+            c_local_x    = DrawX - cloud1_x;
+            c_local_y    = DrawY - cloud1_y;
+            in_any_cloud = 1'b1;
+        end else if (in_cloud2) begin
+            c_local_x    = DrawX - cloud2_x;
+            c_local_y    = DrawY - cloud2_y;
+            in_any_cloud = 1'b1;
+        end else if (in_cloud3) begin
+            c_local_x    = DrawX - cloud3_x;
+            c_local_y    = DrawY - cloud3_y;
+            in_any_cloud = 1'b1;
+        end else begin
+            c_local_x    = 6'd0;
+            c_local_y    = 5'd0;
+            in_any_cloud = 1'b0;
+        end
+    end
+
+    // כתובת ל-ROM: (c_local_y * 48) + c_local_x = (c_local_y << 5) + (c_local_y << 4) + c_local_x
+    logic [10:0] cloud_rom_addr;
+    assign cloud_rom_addr = ({6'b0, c_local_y} * 11'd48) + {5'b0, c_local_x};
+
+    logic [7:0] cloud_pixel_data;
+    cloud_rom u_cloud_rom (
+        .clock   (clk),
+        .address (cloud_rom_addr),
+        .q       (cloud_pixel_data)
+    );
+
+    // -------------------------------------------------------------------------
+    // 4. שכבת הדשא והאדמה (Ground Layer - 16x16 ROM + Solid Dirt)
+    // -------------------------------------------------------------------------
+    localparam GROUND_Y = 10'd420;
+
+    logic in_grass_zone;
+    logic in_dirt_zone;
+    assign in_grass_zone = (DrawY >= GROUND_Y) && (DrawY < GROUND_Y + 10'd16);
+    assign in_dirt_zone  = (DrawY >= GROUND_Y + 10'd16);
+
+    // חישוב כתובת הדשא: (DrawX + scroll) % 16 הוא פשוט 4 הסיביות התחתונות!
+    logic [3:0] grass_tile_x;
+    logic [3:0] grass_tile_y;
+    assign grass_tile_x = DrawX[3:0] + grass_scroll_x[3:0];
+    assign grass_tile_y = DrawY[3:0] - GROUND_Y[3:0];
+
+    logic [7:0] grass_rom_addr;
+    assign grass_rom_addr = {grass_tile_y, grass_tile_x}; // 16x16 = 256 מילים
+
+    logic [7:0] grass_pixel_data;
+    grass_rom u_grass_rom (
+        .clock   (clk),
+        .address (grass_rom_addr),
+        .q       (grass_pixel_data)
+    );
+
+    // -------------------------------------------------------------------------
+    // 5. סנכרון עיכובים (Pipeline Alignment - 1 Clock Cycle)
+    // מכיוון שכל ה-ROMs מחזירים מידע אחרי מחזור שעון אחד,
+    // נדגום את כל הדגלים הגיאומטריים בהתאמה
+    // -------------------------------------------------------------------------
+    logic in_grass_zone_d;
+    logic in_dirt_zone_d;
+    logic in_any_cloud_d;
+
+    always_ff @(posedge clk or negedge resetN) begin
+        if (!resetN) begin
+            in_grass_zone_d <= 1'b0;
+            in_dirt_zone_d  <= 1'b0;
+            in_any_cloud_d  <= 1'b0;
+        end else begin
+            in_grass_zone_d <= in_grass_zone;
+            in_dirt_zone_d  <= in_dirt_zone;
+            in_any_cloud_d  <= in_any_cloud;
+        end
+    end
+
+    // -------------------------------------------------------------------------
+    // 6. מרבב סדר עדיפויות (Priority Multiplexer: Z-Ordering)
+    // -------------------------------------------------------------------------
+    // סדר העומק מהקרוב ביותר לרחוק ביותר:
+    // 1. אדמה תחתונה (Dirt) - הכי קדמי
+    // 2. רצועת דשא זזה (Grass)
+    // 3. עיר ובניינים (City)
+    // 4. עננים (Clouds)
+    // 5. שמיים (Sky) - ברירת מחדל אחורית
+    
+    logic [7:0] selected_pixel_8bit;
+    logic       use_direct_color;
+
+    always_comb begin
+        use_direct_color = 1'b0;
+        selected_pixel_8bit = TRANSPARENT_COLOR;
+
+        // עדיפות 1: אדמה תחתונה (אלגוריתמי)
+        if (in_dirt_zone_d) begin
+            use_direct_color = 1'b1;
+        end
+        // עדיפות 2: אריח דשא
+        else if (in_grass_zone_d && (grass_pixel_data != TRANSPARENT_COLOR)) begin
+            selected_pixel_8bit = grass_pixel_data;
+        end
+        // עדיפות 3: עיר ובניינים
+        else if (city_pixel_valid) begin
+            selected_pixel_8bit = city_pixel_data;
+        end
+        // עדיפות 4: עננים
+        else if (in_any_cloud_d && (cloud_pixel_data != TRANSPARENT_COLOR)) begin
+            selected_pixel_8bit = cloud_pixel_data;
+        end
+        // עדיפות 5: שמיים (אלגוריתמי)
+        else begin
+            use_direct_color = 1'b1;
+        end
+    end
+
+    // המרה סופית ל-RGB 24-bit
+    always_comb begin
+        if (in_dirt_zone_d) begin
+            bg_R = DIRT_R; bg_G = DIRT_G; bg_B = DIRT_B;
+        end else if (use_direct_color) begin
+            bg_R = SKY_R;  bg_G = SKY_G;  bg_B = SKY_B;
+        end else begin
+            decode_rgb332(selected_pixel_8bit, bg_R, bg_G, bg_B);
+        end
+    end
+
+endmodule

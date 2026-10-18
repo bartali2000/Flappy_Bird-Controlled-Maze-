@@ -1,0 +1,112 @@
+module day_night_controller (
+    input  logic        clk,
+    input  logic        resetN,
+    input  logic        frame_pulse,      // פולס סיום פריים מה-VGA (בקצב 60Hz)
+    input  logic        next_level_pulse, // הכנה עתידית: פולס למעבר מיידי לשלב הבא
+
+    output logic [7:0]  sky_color,        // צבע השמיים הנוכחי
+    output logic [7:0]  celestial_color,  // צבע השמש/ירח
+    output logic [10:0] celestial_x,      // מיקום X של השמש/ירח
+    output logic [10:0] celestial_y,      // מיקום Y של השמש/ירח
+    output logic        is_night          // דגל המציין לילה (למשל להדלקת אורות בחלונות הבניינים בעתיד)
+);
+
+    // -------------------------------------------------------------------------
+    // הגדרות המצבים וקבועי הזמן
+    // -------------------------------------------------------------------------
+    typedef enum logic [1:0] {
+        ST_DAY    = 2'd0,
+        ST_SUNSET = 2'd1,
+        ST_NIGHT  = 2'd2
+    } day_state_t;
+
+    day_state_t current_state;
+    logic [11:0] frame_counter;
+
+    // 2048 פריימים ב-60Hz שווים לערך ל-34 שניות לכל שלב ביום
+    localparam MAX_FRAMES = 12'd2048; 
+
+    // -------------------------------------------------------------------------
+    // מכונת המצבים ומונה הפריימים (ניהול הזמן)
+    // -------------------------------------------------------------------------
+    always_ff @(posedge clk or negedge resetN) begin
+        if (!resetN) begin
+            current_state <= ST_DAY;
+            frame_counter <= 12'd0;
+        end else if (frame_pulse) begin
+            // מעבר מצב: אם עבר הזמן או אם התקבל פקודה מבקר המשחק
+            if (next_level_pulse || (frame_counter >= MAX_FRAMES)) begin
+                frame_counter <= 12'd0;
+                
+                if (current_state == ST_DAY) 
+                    current_state <= ST_SUNSET;
+                else if (current_state == ST_SUNSET) 
+                    current_state <= ST_NIGHT;
+                else 
+                    current_state <= ST_DAY; // מחזור מחדש
+            end else begin
+                frame_counter <= frame_counter + 1'b1;
+            end
+        end
+    end
+
+    // -------------------------------------------------------------------------
+    // לוגיקת הצבעים והתנועה (Combinational)
+    // -------------------------------------------------------------------------
+    always_comb begin
+        case (current_state)
+            ST_DAY: begin
+                sky_color       = 8'h7B; // תכלת שמיים
+                celestial_color = 8'hFC; // שמש צהובה (R=7, G=7, B=0)
+                
+                // השמש נעה משמאל לימין: מתחילה ב-50 ומגיעה עד 562
+                celestial_x     = 11'd50 + (frame_counter >> 2); 
+                celestial_y     = 11'd60; // גובה קבוע
+                is_night        = 1'b0;
+            end
+            
+            ST_SUNSET: begin
+                // שינוי הדרגתי של צבע השמיים (Fading)
+                if (frame_counter < 12'd600)
+                    sky_color = 8'h7B; // עדיין תכלת
+                else if (frame_counter < 12'd1400)
+                    sky_color = 8'h9A; // כחול עמוק / סגלגל
+                else
+                    sky_color = 8'hE8; // כתום אדמדם של שקיעה
+
+                // שינוי הדרגתי של צבע השמש
+                if (frame_counter < 12'd600)
+                    celestial_color = 8'hFC; // צהוב
+                else if (frame_counter < 12'd1400)
+                    celestial_color = 8'hF0; // כתום 
+                else
+                    celestial_color = 8'hE0; // אדום עמוק
+
+                // השמש ממשיכה לנוע ימינה אך מתחילה לשקוע (ה-Y גדל)
+                // MAX_FRAMES >> 2 = 512, שזה המיקום שבו השמש סיימה את היום
+                celestial_x = 11'd50 + 11'd512 + (frame_counter >> 3); 
+                celestial_y = 11'd60 + (frame_counter >> 2);
+                is_night    = 1'b0;
+            end
+            
+            ST_NIGHT: begin
+                sky_color       = 8'h02; // שמי הלילה (כחול כהה מאוד)
+                celestial_color = 8'hFF; // ירח לבן/כסוף
+                
+                // הירח זורח ונע לאורך השמיים
+                celestial_x     = 11'd50 + (frame_counter >> 2);
+                celestial_y     = 11'd60;
+                is_night        = 1'b1;
+            end
+            
+            default: begin
+                sky_color       = 8'h7B;
+                celestial_color = 8'hFC;
+                celestial_x     = 11'd50;
+                celestial_y     = 11'd60;
+                is_night        = 1'b0;
+            end
+        endcase
+    end
+
+endmodule

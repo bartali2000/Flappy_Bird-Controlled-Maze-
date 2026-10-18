@@ -1,0 +1,96 @@
+module city_bg_rom_controller (
+    input  logic        clk,
+    input  logic        resetN,
+    input  logic [10:0] pixelX,
+    input  logic [10:0] pixelY,
+    input  logic [10:0] scrollOffset_fg, 
+    input  logic [10:0] scrollOffset_bg, 
+
+    output logic [7:0]  BG_RGB,
+    output logic        boardersDrawReq
+);
+
+    // חישוב מיקום לעיר - רוחב 64
+    logic [5:0] city_tile_x; 
+    logic [4:0] city_tile_y; 
+    logic [10:0] city_rom_addr; 
+    
+    assign city_tile_x = (pixelX + scrollOffset_bg) % 11'd64;
+    assign city_tile_y = pixelY - 11'd380; 
+    assign city_rom_addr = {city_tile_y, city_tile_x}; 
+
+    // חישוב מיקום לרצפה - רוחב 32
+    logic [4:0] floor_tile_x; 
+    logic [4:0] floor_tile_y; 
+    logic [9:0] floor_rom_addr; 
+    
+    assign floor_tile_x = (pixelX + scrollOffset_fg) % 11'd32;
+    assign floor_tile_y = (pixelY - 11'd412) % 11'd32; 
+    assign floor_rom_addr = {floor_tile_y, floor_tile_x};
+
+    // קריאה מהזיכרון
+    logic [7:0] city_pixel_data;
+    logic [7:0] floor_pixel_data;
+
+    // חיבור לזיכרון של העיר
+    simple_rom #(
+        .WIDTH(8), 
+        .DEPTH(2048), 
+        .MIF_FILE("city_day_64x32.mif") // שנה לשם הקובץ שלך
+    ) u_city_rom (
+        .clk(clk),
+        .address(city_rom_addr),
+        .q(city_pixel_data)
+    );
+
+    // חיבור לזיכרון של הרצפה
+    simple_rom #(
+        .WIDTH(8), 
+        .DEPTH(1024), 
+        .MIF_FILE("floor_tile_32x32.mif") // שנה לשם הקובץ שלך
+    ) u_floor_rom (
+        .clk(clk),
+        .address(floor_rom_addr),
+        .q(floor_pixel_data)
+    );
+
+    // השהיית ציר אנכי במחזור אחד בגלל הזיכרון
+    logic [10:0] pixelY_d;
+    
+    always_ff @(posedge clk or negedge resetN) begin
+        if (!resetN) begin
+            pixelY_d <= 11'd0;
+        end else begin
+            pixelY_d <= pixelY;
+        end
+    end
+
+    localparam logic [7:0] COL_SKY = 8'b001_011_11; 
+
+    // בחירת הצבע הסופי להדפסה
+    always_ff @(posedge clk or negedge resetN) begin
+        if (!resetN) begin
+            BG_RGB <= 8'h00;
+            boardersDrawReq <= 1'b0;
+        end else begin
+            boardersDrawReq <= 1'b1; 
+            
+            if (pixelY_d >= 11'd412) begin
+                BG_RGB <= floor_pixel_data;
+            end 
+            else if (pixelY_d >= 11'd380) begin
+                if (city_pixel_data == COL_SKY) begin 
+                    BG_RGB <= COL_SKY;
+                end else begin
+                    BG_RGB <= city_pixel_data;
+                end
+            end 
+            else begin
+                BG_RGB <= COL_SKY;
+            end
+        end
+    end
+
+endmodule
+city_bg_rom_controller.txt
+הפריט city_bg_rom_controller.txt מוצג.

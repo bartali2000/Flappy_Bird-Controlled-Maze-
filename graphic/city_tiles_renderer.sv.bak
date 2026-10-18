@@ -1,0 +1,141 @@
+module city_tiles_renderer (
+    input  logic        clk,
+    input  logic        resetN,
+    input  logic [9:0]  DrawX, DrawY,       // מיקום הפיקסל הנוכחי מסורק ה-VGA
+    input  logic [9:0]  city_scroll_x,      // משתנה התנועה של שכבת העיר
+
+    output logic [7:0]  city_pixel_data,    // אינדקס צבע או פלט RGB מה-MIF
+    output logic        city_pixel_valid    // '1' כשהפיקסל שייך לבניין ולא שקוף
+);
+
+    // פרמטרים גיאומטריים
+    localparam GROUND_Y        = 10'd420;  // קו גובה האדמה במסך
+    localparam TILE_WIDTH      = 5'd32;    // רוחב כל בניין/אריח
+    localparam TILE_HEIGHT     = 5'd16;    // גובה כל אריח בפיקסלים
+    localparam TRANSPARENT_COLOR = 8'hE0;  // צבע המוגדר כשקוף ב-MIF (למשל מג'נטה)
+
+    // -------------------------------------------------------------------------
+    // 1. חישוב קואורדינטות וירטואליות ואינדקס הבניין הנוכחי
+    // -------------------------------------------------------------------------
+    logic [10:0] virtual_x;
+    assign virtual_x = {1'b0, DrawX} + {1'b0, city_scroll_x};
+
+    // חילוק ב-32 מתבצע ללא משאבים: גזירת הסיביות מאינדקס 5 ומעלה
+    // לוקחים 4 סיביות כדי לקבל מחזוריות של 16 בניינים שונים
+    logic [3:0] building_idx;
+    assign building_idx = virtual_x[8:5];
+
+    // מיקום ה-X הפנימי בתוך האריח (0 עד 31)
+    logic [4:0] tile_x;
+    assign tile_x = virtual_x[4:0];
+
+    // -------------------------------------------------------------------------
+    // 2. טבלת גבהים לבניינים (Look-Up Table)
+    // הערכים הם בכפולות של 16 פיקסלים לקבלת קומות שלמות: גג (16px) + N קומות
+    // -------------------------------------------------------------------------
+    logic [7:0] building_height;
+    always_comb begin
+        case (building_idx)
+            4'h0: building_height = 8'd64;   // גג + 3 קומות
+            4'h1: building_height = 8'd112;  // גג + 6 קומות
+            4'h2: building_height = 8'd48;   // גג + 2 קומות
+            4'h3: building_height = 8'd128;  // גג + 7 קומות
+            4'h4: building_height = 8'd80;   // גג + 4 קומות
+            4'h5: building_height = 8'd48;   // גג + 2 קומות
+            4'h6: building_height = 8'd96;   // גג + 5 קומות
+            4'h7: building_height = 8'd64;   // גג + 3 קומות
+            4'h8: building_height = 8'd112;
+            4'h9: building_height = 8'd80;
+            4'hA: building_height = 8'd48;
+            4'hB: building_height = 8'd96;
+            4'hC: building_height = 8'd64;
+            4'hD: building_height = 8'd128;
+            4'hE: building_height = 8'd80;
+            4'hF: building_height = 8'd96;
+            default: building_height = 8'd64;
+        endcase
+    end
+
+    // -------------------------------------------------------------------------
+    // 3. מיפוי גבהים וכתובות לקריאה מה-ROM
+    // -------------------------------------------------------------------------
+    logic [9:0] building_top_y;
+    assign building_top_y = GROUND_Y - building_height;
+
+    logic [9:0] offset_from_top;
+    assign offset_from_top = DrawY - building_top_y;
+
+    // דגלי זיהוי האזור
+    logic in_building_zone;
+    logic is_roof_zone;
+    logic is_body_zone;
+
+    always_comb begin
+        in_building_zone = (DrawY >= building_top_y) && (DrawY < GROUND_Y);
+        is_roof_zone     = in_building_zone && (offset_from_top < TILE_HEIGHT);
+        is_body_zone     = in_building_zone && (offset_from_top >= TILE_HEIGHT);
+    end
+
+    // כתובת ל-Roof ROM: offset_from_top הוא ערך מ-0 עד 15
+    logic [8:0] roof_rom_addr;
+    assign roof_rom_addr = {offset_from_top[3:0], tile_x}; // שקול ל: (y * 32) + x
+
+    // כתובת ל-Body ROM: שכפול קומות בעזרת 4 הסיביות התחתונות (מודולו 16 טבעי)
+    logic [8:0] body_rom_addr;
+    assign body_rom_addr = {offset_from_top[3:0], tile_x};
+
+    // -------------------------------------------------------------------------
+    // 4. מופעי רכיבי ה-ROM (Intel IP Single-Port ROM)
+    // -------------------------------------------------------------------------
+    logic [7:0] roof_data_out;
+    logic [7:0] body_data_out;
+
+    // ROM גג הבניין - מאותחל ע"י building_roof.mif
+    roof_rom u_roof_rom (
+        .clock   (clk),
+        .address (roof_rom_addr),
+        .q       (roof_data_out)
+    );
+
+    // ROM גוף הבניין - מאותחל ע"י building_body.mif
+    body_rom u_body_rom (
+        .clock   (clk),
+        .address (body_rom_addr),
+        .q       (body_data_out)
+    );
+
+    // -------------------------------------------------------------------------
+    // 5. סנכרון עיכוב (Pipeline Matching) ובחירת הצבע הסופי
+    // -------------------------------------------------------------------------
+    // מכיוון שה-ROM מחזיר תוצאה לאחר מחזור שעון אחד,
+    // נדגום את דגלי האזור לאותו מחזור שעון בדיוק
+    logic is_roof_zone_d;
+    logic is_body_zone_d;
+
+    always_ff @(posedge clk or negedge resetN) begin
+        if (!resetN) begin
+            is_roof_zone_d <= 1'b0;
+            is_body_zone_d <= 1'b0;
+        end else begin
+            is_roof_zone_d <= is_roof_zone;
+            is_body_zone_d <= is_body_zone;
+        end
+    end
+
+    // בחירת הפיקסל מתוך ה-ROM המתאים
+    always_comb begin
+        if (is_roof_zone_d) begin
+            city_pixel_data  = roof_data_out;
+            city_pixel_valid = (roof_data_out != TRANSPARENT_COLOR);
+        end 
+        else if (is_body_zone_d) begin
+            city_pixel_data  = body_data_out;
+            city_pixel_valid = (body_data_out != TRANSPARENT_COLOR);
+        end 
+        else begin
+            city_pixel_data  = TRANSPARENT_COLOR;
+            city_pixel_valid = 1'b0;
+        end
+    end
+
+endmodule
